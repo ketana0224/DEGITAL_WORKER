@@ -1,0 +1,4 @@
+id,question,category,priority
+Q001,Azure Functions のコールドスタートを抑える方法は?,performance,high
+Q002,Application Insights のサンプリング率の推奨値は?,observability,medium
+Q003,Managed Identity と Service Principal の使い分けは?,security,high
