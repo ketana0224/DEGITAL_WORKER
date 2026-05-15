@@ -176,11 +176,26 @@ copilot -p "/qa-research-responder Azure Container Apps の最小インスタン
 ### 2-5. パターン C: 自動承認モード（CI / バッチ向け）
 
 ```powershell
+# 推奨: すべてのツール実行を確認なしで許可
 copilot --allow-all-tools -p "@QA Pipeline Orchestrator sample-questions.csv の質問を全件処理"
+
+# 別名フラグ (短縮形)
+copilot --allow-all -p "@QA Pipeline Orchestrator sample-questions.csv の質問を全件処理"
 ```
 
-> ⚠️ `--allow-all-tools` は確認なしで全ツール実行を許可します。
+両フラグの違い:
+
+| フラグ | 効果 |
+|--------|------|
+| `--allow-all-tools` | 全ツール (read/edit/execute/web/...) の実行を自動許可 |
+| `--allow-all` | 上記に加えてファイル変更・追加プロンプト確認も自動許可 |
+
+> ⚠️ どちらも確認ダイアログをスキップします。
 > CI / 信頼済みワークスペースのみで使用してください。
+> 実行前に必ず `git status` で意図しない変更がないか確認することを推奨します。
+
+> 💡 ありがちなミス: `--all-allow` は **誤り** です（`copilot --all-allow` → exit code 1）。
+> 正しくは `--allow-all` または `--allow-all-tools` の順です。
 
 ### 2-6. パターン D: スクリプトを直接実行（CLI 単独）
 
@@ -227,7 +242,7 @@ jobs:
         with: { node-version: '20' }
       - run: npm install -g @github/copilot
       - run: |
-          copilot --allow-all-tools \
+          copilot --allow-all \
             -p "@QA Pipeline Orchestrator .github/skills/qa-research-responder/assets/sample-questions.csv の全件を処理"
         env:
           GH_TOKEN: ${{ secrets.GH_COPILOT_TOKEN }}
@@ -270,7 +285,8 @@ code (Get-ChildItem ./output/reviews -Filter "*batch-review.md" | Sort-Object La
 | `/qa-*` が一覧に出ない | VS Code を `Developer: Reload Window` で再読み込み |
 | `@QA Pipeline Orchestrator` が出ない | Agent モードか確認、または [qa-pipeline-orchestrator.agent.md](.github/agents/qa-pipeline-orchestrator.agent.md) の YAML 構文を確認 |
 | CLI で `copilot: command not found` | `npm bin -g` のパスを `PATH` に追加 |
-| 「ツール実行に許可が必要」 | Agent モードで Allow / Always Allow を選択、CLI なら `--allow-all-tools` |
+| 「ツール実行に許可が必要」 | Agent モードで Allow / Always Allow を選択、CLI なら `--allow-all` または `--allow-all-tools` |
+| `copilot --all-allow` で exit code 1 | フラグ名の誤り。正しくは `--allow-all` または `--allow-all-tools` |
 | 出力ファイルが空 | スクリプト単独実行はテンプレ生成のみ。本処理は Copilot 経由で実行する |
 | 機密情報を外に出したくない | `--internal-only` フラグまたは「機密モードで」と指示 |
 
