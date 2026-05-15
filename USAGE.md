@@ -149,15 +149,56 @@ Copilot CLI はカレントディレクトリ配下の `.github/skills/`、`.git
 copilot
 ```
 
-プロンプトが起動したら:
+> ⚠️ **CLI と VS Code Chat の記法の違い**
+>
+> | 記号 | VS Code Chat | Copilot CLI |
+> |------|--------------|-------------|
+> | `@`  | カスタムエージェント呼び出し | **ファイル参照** (補完で files が出る) |
+> | `#`  | コンテキスト参照 | **issue 参照** |
+> | `/`  | スキル / スラッシュコマンド | スキル / スラッシュコマンド (共通) |
+>
+> CLI で `@QA...` と打っても **エージェントは起動しません**。下記のいずれかで起動してください。
+
+#### A-1. `/agents` でエージェントを選択（推奨）
 
 ```text
-> @QA Pipeline Orchestrator Azure Functions のコールドスタートを抑える方法を教えて
+> /agents
+```
+
+ロード済みエージェント一覧が表示されます。`QA Pipeline Orchestrator` を選択するとアクティブになります。
+そのあとは普通に質問するだけでオーケストレーターが動きます。
+
+```text
+> Azure Functions のコールドスタートを抑える方法を教えてください
+```
+
+#### A-2. 自然言語で起動（description のトリガー語が反応）
+
+エージェント名を打たなくても、description の WHEN フレーズを含む文章を投げれば自動で起動します。
+
+```text
+> 質問の調査からレビューまで一気通貫で実行してください: Application Insights のサンプリング率の推奨値は？
 ```
 
 ```text
-> /qa-research-responder Managed Identity と Service Principal の使い分けは？
+> QA フルパイプラインを実行してください: Managed Identity と Service Principal の使い分けは？
 ```
+
+#### A-3. スキルは `/` で呼ぶ
+
+スキル（`SKILL.md`）はチャットと同じく `/` で補完されます。
+
+```text
+> /qa-research-responder Azure Container Apps の最小インスタンス数の推奨は？
+```
+
+#### A-4. 起動時にデフォルトエージェントを指定
+
+```powershell
+copilot --agent "QA Pipeline Orchestrator"
+```
+
+（CLI バージョンによってはこのフラグが利用可能。詳細は `copilot --help` を確認してください）
 
 終了は `Ctrl+D` または `/exit`。
 
@@ -172,12 +213,18 @@ copilot
 ### 2-4. パターン B: ワンショット実行
 
 ```powershell
-# オーケストレーター経由
-copilot -p "@QA Pipeline Orchestrator Application Insights のサンプリング率の推奨値は？"
+# オーケストレーター経由 (自然言語のトリガー語で自動起動)
+copilot -p "質問の調査からレビューまで一気通貫で実行してください: Application Insights のサンプリング率の推奨値は？"
+
+# エージェント指定 (フラグ対応版の場合)
+copilot --agent "QA Pipeline Orchestrator" -p "Application Insights のサンプリング率の推奨値は？"
 
 # スキル単独
 copilot -p "/qa-research-responder Azure Container Apps の最小インスタンス数の推奨は？"
 ```
+
+> ⚠️ CLI では `-p "@QA Pipeline ..."` の `@` はファイル参照として解釈されるため、
+> エージェントは起動しません。description のトリガー語を含むプロンプトを使ってください。
 
 `-p` (prompt) でワンショット実行できます。スクリプト連携に向いています。
 
@@ -185,10 +232,11 @@ copilot -p "/qa-research-responder Azure Container Apps の最小インスタン
 
 ```powershell
 # 推奨: すべてのツール実行を確認なしで許可
-copilot --allow-all-tools -p "@QA Pipeline Orchestrator sample-questions.csv の質問を全件処理"
+# オーケストレーターは description のトリガー語で自動起動させる
+copilot --allow-all-tools -p "QA フルパイプラインで sample-questions.csv の質問を全件処理してください"
 
 # 別名フラグ (短縮形)
-copilot --allow-all -p "@QA Pipeline Orchestrator sample-questions.csv の質問を全件処理"
+copilot --allow-all -p "調査からレビューまで一気通貫で: sample-questions.csv の全件"
 ```
 
 両フラグの違い:
@@ -251,7 +299,7 @@ jobs:
       - run: npm install -g @github/copilot
       - run: |
           copilot --allow-all \
-            -p "@QA Pipeline Orchestrator .github/skills/qa-research-responder/assets/sample-questions.csv の全件を処理"
+            -p "QA フルパイプラインで .github/skills/qa-research-responder/assets/sample-questions.csv の全件を処理してください"
         env:
           GH_TOKEN: ${{ secrets.GH_COPILOT_TOKEN }}
       - uses: actions/upload-artifact@v4
@@ -291,7 +339,8 @@ code (Get-ChildItem ./output/reviews -Filter "*batch-review.md" | Sort-Object La
 | 症状 | 対処 |
 |------|------|
 | `/qa-*` が一覧に出ない | VS Code を `Developer: Reload Window` で再読み込み |
-| `@QA Pipeline Orchestrator` が出ない | Agent モードか確認、または [qa-pipeline-orchestrator.agent.md](.github/agents/qa-pipeline-orchestrator.agent.md) の YAML 構文を確認 |
+| VS Code Chat で `@QA Pipeline Orchestrator` が出ない | Agent モードか確認、または [qa-pipeline-orchestrator.agent.md](.github/agents/qa-pipeline-orchestrator.agent.md) の YAML 構文を確認 |
+| CLI で `@QA...` を打っても補完されず起動しない | CLI の `@` はファイル参照。`/agents` で選択か、description のトリガー語を含む自然言語で起動させる |
 | CLI で `copilot: command not found` | `npm bin -g` のパスを `PATH` に追加 |
 | 「ツール実行に許可が必要」 | Agent モードで Allow / Always Allow を選択、CLI なら `--allow-all` または `--allow-all-tools` |
 | `copilot --all-allow` で exit code 1 | フラグ名の誤り。正しくは `--allow-all` または `--allow-all-tools` |
@@ -302,16 +351,22 @@ code (Get-ChildItem ./output/reviews -Filter "*batch-review.md" | Sort-Object La
 
 ## 6. クイックスタート
 
-すぐ試したい場合は次の 1 行をチャットに貼ってください:
+### VS Code Copilot Chat
 
 ```text
 @QA Pipeline Orchestrator Azure Functions のコールドスタートを抑える方法を教えてください
 ```
 
-CLI なら:
+### Copilot CLI
 
 ```powershell
-copilot -p "@QA Pipeline Orchestrator Azure Functions のコールドスタートを抑える方法を教えてください"
+# 自然言語のトリガー語でオーケストレーターを起動
+copilot -p "QA フルパイプラインで Azure Functions のコールドスタートを抑える方法を教えてください"
+
+# または対話モードで /agents を選択してから質問
+copilot
+> /agents
+> Azure Functions のコールドスタートを抑える方法を教えてください
 ```
 
 ## 参照
