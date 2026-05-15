@@ -161,6 +161,14 @@ copilot
 
 終了は `Ctrl+D` または `/exit`。
 
+> 💡 対話モードでも `--allow-all` / `--allow-all-tools` フラグを併用できます。
+> 確認ダイアログを毎回スキップしたい場合に便利です。
+>
+> ```powershell
+> copilot --allow-all
+> copilot --allow-all-tools
+> ```
+
 ### 2-4. パターン B: ワンショット実行
 
 ```powershell
