@@ -1,0 +1,6 @@
+# Excel files
+excel/
+
+# Generated reports and task workspaces
+report/
+task/
