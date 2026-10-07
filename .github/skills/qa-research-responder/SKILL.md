@@ -13,7 +13,7 @@ user-invocable: true
 出典付きの **回答ドラフト** を Markdown 形式で生成する。
 
 - 入力: 質問文（自由テキスト）または質問一覧ファイル（`.md` / `.txt` / `.csv`）
-- 出力: `./output/answers/<YYYYMMDD-HHmm>-<slug>.md`（出典・信頼度付き）
+- 出力: `<リポジトリルート>/report/<YYYYMMDD-HHmm>-<slug>.md`（出典・信頼度付き）
 
 ## 使用するタイミング (WHEN)
 
@@ -71,7 +71,7 @@ user-invocable: true
 ### Step 4. 出力と検証
 
 1. [生成スクリプト](./scripts/generate-answer.ps1) で出力ファイルを作成
-2. 出力先: `./output/answers/<YYYYMMDD-HHmm>-<slug>.md`
+2. 出力先: `<リポジトリルート>/report/<YYYYMMDD-HHmm>-<slug>.md`
 3. 出典が 1 つもない箇所は **`[要出典]`** とマークする
 4. ユーザーに要約 3 行で結果を提示し、ファイルパスを通知
 

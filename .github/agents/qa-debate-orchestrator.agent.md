@@ -1,10 +1,7 @@
 ---
-description: '複数モデル (Claude / GPT) を議論させて結論を導く QA 議論オーケストレーター。最大 3 ターン議論 → レビュー → ファクト不足なら再調査 → 結論レポート出力。WHEN: "議論で深掘りして", "複数モデルで調査", "Multi-Agent Debate", "qa-debate-orchestrator", "議論しながら結論を導いて", "ファクトチェック込みで深掘り調査"。DO NOT USE FOR: 単純な単発調査(qa-research-responder を使う)、シンプルな直列パイプライン(qa-pipeline-orchestrator を使う)、機密データの外部議論。'
-name: 'QA Debate Orchestrator'
-model: 'Claude Sonnet 4.5'
-tools: [read, edit, search, execute, web, agent]
-agents: [qa-web-claude, qa-web-gpt, qa-debate-reviewer]
-argument-hint: '調査テーマ (自由記述)'
+name: qa-debate-orchestrator
+description: "複数モデル (Claude / GPT) を議論させて結論を導く QA 議論オーケストレーター。最大 3 ターン議論 → レビュー → ファクト不足なら再調査 → 結論レポート出力。WHEN: \"議論で深掘りして\", \"複数モデルで調査\", \"Multi-Agent Debate\", \"qa-debate-orchestrator\", \"議論しながら結論を導いて\", \"ファクトチェック込みで深掘り調査\"。DO NOT USE FOR: 単純な単発調査(qa-research-responder を使う)、シンプルな直列パイプライン(qa-pipeline-orchestrator を使う)、機密データの外部議論。"
+tools: ['codebase', 'editFiles', 'runCommands', 'search']
 user-invocable: true
 ---
 
@@ -33,9 +30,9 @@ Claude 系と GPT 系の 2 つの調査サブエージェントに議論させ�
 
 | エージェント | モデル | 役割 |
 |--------------|--------|------|
-| [qa-web-claude](./qa-web-claude.agent.md) | Claude Sonnet 4.5 | Web 調査 (Claude 視点) |
-| [qa-web-gpt](./qa-web-gpt.agent.md) | GPT-5 | Web 調査 (GPT 視点) |
-| [qa-debate-reviewer](./qa-debate-reviewer.agent.md) | Claude Sonnet 4.5 | 議論レビュー & ファクトチェック |
+| [qa-web-claude](./qa-web-claude.agent.md) | Claude Sonnet 4.6 | Web 調査 (Claude 視点) |
+| [qa-web-gpt](./qa-web-gpt.agent.md) | GPT-5.5 | Web 調査 (GPT 視点) |
+| [qa-debate-reviewer](./qa-debate-reviewer.agent.md) | Claude Opus 4.8 | 議論レビュー & ファクトチェック |
 
 > **モデル指定について**: 各 `.agent.md` の `model:` フィールドで指定しています。
 > 利用環境で使用できるモデル名と異なる場合は Copilot 側でフォールバックされます。
@@ -121,7 +118,7 @@ Claude 系と GPT 系の 2 つの調査サブエージェントに議論させ�
 
 #### 5-1. 議論プロセスログ
 
-ファイル: `./report/<yyyyMMdd-HHmm>-<slug>/debate-log.md`
+ファイル: `./_report/<yyyyMMdd-HHmm>-<slug>/debate-log.md`
 
 ```markdown
 # 議論ログ: {{テーマ}}
@@ -131,10 +128,10 @@ Claude 系と GPT 系の 2 つの調査サブエージェントに議論させ�
 - **再調査**: あり / なし
 
 ## Turn 1
-### Claude (Sonnet 4.5) の主張
+### Claude の主張
 {{Claude の出力をそのまま}}
 
-### GPT-5 の主張
+### GPT-5.5 の主張
 {{GPT の出力をそのまま}}
 
 ## Turn 2

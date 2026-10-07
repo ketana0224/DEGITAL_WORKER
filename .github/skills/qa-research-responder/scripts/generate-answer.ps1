@@ -5,7 +5,7 @@
 #   pwsh -File ./generate-answer.ps1 `
 #       -QuestionId "Q001" `
 #       -Question "Azure Functions のコールドスタートを抑える方法" `
-#       -OutputDir "./output/answers"
+#       -OutputDir "./report"
 # =============================================================
 
 param(
@@ -23,7 +23,7 @@ param(
     [string]$Confidence = "Medium",
 
     [Parameter(Mandatory = $false)]
-    [string]$OutputDir = "./output/answers"
+    [string]$OutputDir = "./report"
 )
 
 if (-not (Test-Path $OutputDir)) {
